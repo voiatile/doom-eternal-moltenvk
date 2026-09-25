@@ -91,14 +91,14 @@ With the patched build:
 
 * `vkCreateDevice()` succeeds;
 * DOOM Eternal reaches the main menu;
-* Vulkan swapchains are created successfully.
+* Vulkan swapchains are created successfully;
+* gameplay is fully playable;
+* no crashes were observed during more than one hour of continuous gameplay.
 
-For example, MoltenVK reported successful creation of swapchains with sizes including:
+The game remained stable throughout the gameplay test, with no further crashes or Vulkan device initialization failures observed.
 
-```text
-1512 x 982
-1504 x 830
-```
+
+
 
 ## Known limitations
 
