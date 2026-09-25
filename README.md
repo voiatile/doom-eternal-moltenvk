@@ -102,18 +102,12 @@ The game remained stable throughout the gameplay test, with no further crashes o
 
 ## Known limitations
 
-This workaround does not provide full native support for every Vulkan feature that DOOM Eternal may use.
-
 During testing, MoltenVK also reported a shader compilation failure for a shader using double-precision operations:
 
-```text
 Shader library compile failed
 error: 'double' is not supported in Metal
-```
 
-The game continued running after this particular error during testing, but this demonstrates that the workaround does not eliminate all Vulkan/Metal compatibility limitations.
-
-There were also Wine/CrossOver input-related warnings during testing, including `rawinput` warnings. These were observed but were not established as a MoltenVK compatibility failure.
+Despite this message, the game continued running normally and remained stable during more than one hour of gameplay testing.
 
 ## Debugging
 
@@ -130,7 +124,7 @@ The debug code is intentionally retained in the published patch because it docum
 ## Files
 
 * `doom-eternal-moltenvk.patch` — patch against MoltenVK 1.4.3
-* `libMoltenVK.dylib.zip` — prebuilt patched MoltenVK library
+* `libMoltenVK.dylib` — prebuilt patched MoltenVK library
 
 ## Upstream issue
 
