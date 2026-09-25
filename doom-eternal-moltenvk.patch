@@ -1,0 +1,78 @@
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm b/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm
+index 26928c14..349c977f 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm
+@@ -272,6 +272,13 @@
+ 
+ 	features->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+ 	features->features = _features;
++	MVKLogInfo("GETFEATURES DEBUG: tessellationShader=%d depthBounds=%d wideLines=%d shaderCullDistance=%d",
++		_features.tessellationShader,
++		_features.depthBounds,
++		_features.wideLines,
++		_features.shaderCullDistance);
++
++
+ 	for (auto* next = (VkBaseOutStructure*)features->pNext; next; next = next->pNext) {
+ 		switch ((uint32_t)next->sType) {
+ 			case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES: {
+@@ -1478,7 +1485,7 @@
+ 
+ void MVKPhysicalDevice::populateSubgroupProperties(VkPhysicalDeviceVulkan11Properties* pVk11Props) {
+ 	pVk11Props->subgroupSize = _metalFeatures.maxSubgroupSize;
+-	pVk11Props->subgroupSupportedStages = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
++	pVk11Props->subgroupSupportedStages = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+ 	if (_features.tessellationShader) {
+ 		pVk11Props->subgroupSupportedStages |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+ 	}
+@@ -2859,6 +2866,18 @@
+ 		_features.shaderInt64 = true;
+     }
+ 
++	// DOOM Eternal compatibility spoof
++	_features.geometryShader = true;
++	_features.depthBounds = true;
++	_features.wideLines = true;
++	_features.shaderCullDistance = true;
++
++	MVKLogInfo("FEATURE DEBUG: tessellationShader=%d depthBounds=%d wideLines=%d shaderCullDistance=%d",
++		_features.tessellationShader,
++		_features.depthBounds,
++		_features.wideLines,
++		_features.shaderCullDistance);
++
+ 	// Additional non-extension Vulkan 1.2 features.
+ 	mvkClear(&_vulkan12NoExtFeatures);		// Start with everything cleared
+ 	_vulkan12NoExtFeatures.samplerMirrorClampToEdge = _metalFeatures.samplerMirrorClampToEdge;
+@@ -3177,7 +3196,7 @@ static uint32_t mvkGetEntryProperty(io_registry_entry_t entry, CFStringRef prope
+ 	// We determine Apple Silicon directly from the GPU, instead
+ 	// of from the build, in case we are running Rosetta2.
+ 	if (_gpuCapabilities.isAppleGPU) {
+-		_properties.vendorID = kAppleVendorId;
++		_properties.vendorID = kAMDVendorId;
+ 		_properties.deviceID = getHighestGPUCapability();
+ 		return;
+ 	}
+@@ -3271,7 +3290,7 @@ static uint32_t mvkGetEntryProperty(io_registry_entry_t entry, CFStringRef prope
+ // For Apple Silicon, the Device ID is determined by the highest
+ // GPU capability, which is a combination of OS version and GPU type.
+ void MVKPhysicalDevice::initGPUInfoProperties() {
+-	_properties.vendorID = kAppleVendorId;
++	_properties.vendorID = kAMDVendorId;
+ 	_properties.deviceID = getHighestGPUCapability();
+ 	_properties.deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+ 	strlcpy(_properties.deviceName, _mtlDevice.name.UTF8String, VK_MAX_PHYSICAL_DEVICE_NAME_SIZE);
+@@ -5470,6 +5489,13 @@ static uint32_t mvkGetEntryProperty(io_registry_entry_t entry, CFStringRef prope
+ template<typename S>
+ void MVKDevice::enableFeatures(S* pRequested, VkBool32* pEnabledBools, const VkBool32* pRequestedBools, const VkBool32* pAvailableBools, uint32_t count) {
+ 	for (uint32_t i = 0; i < count; i++) {
++	MVKLogInfo("FEATURE REQUEST DEBUG: count=%u flags5=%d/%d flags15=%d/%d flags16=%d/%d flags39=%d/%d",
++		count,
++		pRequestedBools[4], pAvailableBools[4],
++		pRequestedBools[14], pAvailableBools[14],
++		pRequestedBools[15], pAvailableBools[15],
++		pRequestedBools[38], pAvailableBools[38]);
++
+ 		pEnabledBools[i] = pRequestedBools[i] && pAvailableBools[i];
+ 		if (pRequestedBools[i] && !pAvailableBools[i]) {
+ 			uintptr_t mbrOffset = (uintptr_t)&pRequestedBools[i] - (uintptr_t)mvkGetAddressOfFirstMember(pRequested);
